@@ -131,6 +131,10 @@ async def process_webhook(request: Request):
     await bot_app.process_update(update)
     return {"ok": True}
 
+@app.get("/healthz")
+async def health_check():
+    return {"status": "ok"}
+
 # Local testing entry (not used in render)
 if __name__ == "__main__":
     if platform.system() == "Windows":
