@@ -45,7 +45,7 @@ chat_histories = {}
 paid_users = set()
 
 MIN_SECONDS_BETWEEN_MESSAGES = 3
-FREE_MESSAGE_LIMIT = 3
+FREE_MESSAGE_LIMIT = 10000 # Reduce it later
 PAYMENT_LINK = "https://yourwebsite.com/subscribe"
 
 # Bot Handlers
