@@ -22,7 +22,7 @@ WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "supersecret")
 RENDER_EXTERNAL_URL = os.getenv("RENDER_EXTERNAL_URL", "https://your-bot.onrender.com")
 
 WEBHOOK_PATH = f"/webhook/{WEBHOOK_SECRET}"
-WEBHOOK_URL = f"{RENDER_EXTERNAL_URL}{WEBHOOK_PATH}"
+WEBHOOK_URL = f"https://telegram-bot.onrender.com/telegram/{TOKEN}"
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
