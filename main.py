@@ -35,6 +35,9 @@ PAYMENT_LINK = "https://yourwebsite.com/subscribe"
 chat_histories = {}
 
 app = FastAPI()
+@app.get("/healthz")
+async def health_check():
+    return {"status": "ok"}
 bot_app = ApplicationBuilder().token(TOKEN).build()
 
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -131,9 +134,6 @@ async def process_webhook(request: Request):
     await bot_app.process_update(update)
     return {"ok": True}
 
-@app.get("/healthz")
-async def health_check():
-    return {"status": "ok"}
 
 # Local testing entry (not used in render)
 if __name__ == "__main__":
