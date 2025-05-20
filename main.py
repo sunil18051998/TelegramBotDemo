@@ -11,6 +11,7 @@ from telegram.ext import (
     ContextTypes, filters
 )
 from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from openai import OpenAI
 
 logging.basicConfig(level=logging.INFO)
@@ -35,9 +36,13 @@ PAYMENT_LINK = "https://yourwebsite.com/subscribe"
 chat_histories = {}
 
 app = FastAPI()
-@app.get("/healthz")
-async def health_check():
+
+@app.api_route("/healthz", methods=["GET", "HEAD"])
+async def health_check(request: Request):
+    if request.method == "HEAD":
+        return JSONResponse(content=None, status_code=200)
     return {"status": "ok"}
+
 bot_app = ApplicationBuilder().token(TOKEN).build()
 
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
