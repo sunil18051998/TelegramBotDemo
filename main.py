@@ -18,12 +18,11 @@ from utils.ai_handler import openai_handler
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# FastAPI app and Telegram bot
+app = FastAPI()
 # Initialize bot
 bot_app = ApplicationBuilder().token(BOT_TOKEN).build()
 
-# FastAPI app and Telegram bot
-app = FastAPI()
-bot_app = ApplicationBuilder().token(TOKEN).build()
 
 # Health check
 @app.api_route("/healthz", methods=["GET", "HEAD"])
