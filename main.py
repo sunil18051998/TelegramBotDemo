@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import os
 import platform
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -10,19 +9,31 @@ from telegram.ext import (
     MessageHandler, filters
 )
 
-from config import WEBHOOK_PATH, WEBHOOK_URL, WEBHOOK_SECRET, BOT_TOKEN, OPENAI_API_KEY
+from config import (
+    WEBHOOK_PATH, WEBHOOK_URL, WEBHOOK_SECRET, BOT_TOKEN,
+    FREE_MESSAGE_LIMIT, MIN_SECONDS_BETWEEN_MESSAGES
+)
 from handlers.bot_handlers import start, subscribe, echo, error_handler
 from utils.ai_handler import openai_handler
 
 # Setup logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
-# FastAPI app and Telegram bot
+# Initialize FastAPI app
 app = FastAPI()
+
 # Initialize bot
 bot_app = ApplicationBuilder().token(BOT_TOKEN).build()
 
+# Register handlers
+bot_app.add_handler(CommandHandler("start", start))
+bot_app.add_handler(CommandHandler("subscribe", subscribe))
+bot_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
+bot_app.add_error_handler(error_handler)
 
 # Health check
 @app.api_route("/healthz", methods=["GET", "HEAD"])
@@ -35,15 +46,7 @@ user_message_count = {}
 chat_histories = {}
 paid_users = set()
 
-MIN_SECONDS_BETWEEN_MESSAGES = 3
-FREE_MESSAGE_LIMIT = 10000 # Reduce it later
 PAYMENT_LINK = "https://yourwebsite.com/subscribe"
-
-# Register handlers
-bot_app.add_handler(CommandHandler("start", start))
-bot_app.add_handler(CommandHandler("subscribe", subscribe))
-bot_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
-bot_app.add_error_handler(error_handler)
 
 # Webhook handler
 @app.post(WEBHOOK_PATH)
