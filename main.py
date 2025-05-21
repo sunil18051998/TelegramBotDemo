@@ -4,8 +4,9 @@ import platform
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, CallbackQueryHandler
 from telegram.error import TelegramError
+from handlers.bot_handlers import handle_subscription_click
 
 from config import (
     WEBHOOK_PATH, WEBHOOK_URL, WEBHOOK_SECRET, BOT_TOKEN,
@@ -30,6 +31,7 @@ bot_app = ApplicationBuilder().token(BOT_TOKEN).build()
 bot_app.add_handler(CommandHandler("start", start))
 bot_app.add_handler(CommandHandler("subscribe", subscribe))
 bot_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
+bot_app.add_handler(CallbackQueryHandler(handle_subscription_click))
 bot_app.add_error_handler(error_handler)
 
 # Health check
