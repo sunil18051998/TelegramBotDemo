@@ -5,6 +5,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
+from telegram.error import TelegramError
 
 from config import (
     WEBHOOK_PATH, WEBHOOK_URL, WEBHOOK_SECRET, BOT_TOKEN,
@@ -40,18 +41,43 @@ async def health_check(request: Request):
 @app.post(WEBHOOK_PATH)
 async def telegram_webhook(request: Request):
     try:
-        # Initialize the application if not already initialized
+        # Ensure application is initialized
         if not bot_app.running:
+            logger.info("Initializing bot application...")
             await bot_app.initialize()
             await bot_app.start()
-            await bot_app.updater.start_polling()
+            logger.info("Bot application initialized successfully")
 
-        data = await request.json()
-        update = Update.de_json(data, bot_app.bot)
-        await bot_app.process_update(update)
-        return JSONResponse(content={"status": "ok"}, status_code=200)
+        # Parse update
+        try:
+            data = await request.json()
+            update = Update.de_json(data, bot_app.bot)
+        except Exception as e:
+            logger.error(f"Error parsing webhook data: {str(e)}")
+            return JSONResponse(
+                content={"error": "Invalid webhook data", "details": str(e)},
+                status_code=400
+            )
+
+        # Process update
+        try:
+            await bot_app.process_update(update)
+            return JSONResponse(content={"status": "ok"}, status_code=200)
+        except TelegramError as e:
+            logger.error(f"Telegram error while processing update: {str(e)}")
+            return JSONResponse(
+                content={"error": "Telegram error", "details": str(e)},
+                status_code=500
+            )
+        except Exception as e:
+            logger.error(f"Error processing update: {str(e)}")
+            return JSONResponse(
+                content={"error": "Update processing error", "details": str(e)},
+                status_code=500
+            )
+
     except Exception as e:
-        logger.error(f"Webhook error: {str(e)}")
+        logger.error(f"Critical webhook error: {str(e)}")
         return JSONResponse(
             content={"error": "Internal server error", "details": str(e)},
             status_code=500
@@ -61,11 +87,14 @@ async def telegram_webhook(request: Request):
 @app.on_event("startup")
 async def on_startup():
     try:
+        logger.info("Starting bot application...")
         await bot_app.initialize()
         await bot_app.start()
-        await bot_app.updater.start_polling()
+        
+        # Set webhook
+        logger.info(f"Setting webhook to {WEBHOOK_URL}")
         await bot_app.bot.set_webhook(WEBHOOK_URL)
-        logger.info("Bot started and webhook set")
+        logger.info("Bot started and webhook set successfully")
     except Exception as e:
         logger.error(f"Error during startup: {str(e)}")
         raise
@@ -73,10 +102,11 @@ async def on_startup():
 @app.on_event("shutdown")
 async def on_shutdown():
     try:
+        logger.info("Shutting down bot application...")
         await bot_app.bot.delete_webhook()
         await bot_app.stop()
         await bot_app.shutdown()
-        logger.info("Bot shutdown and webhook removed")
+        logger.info("Bot shutdown completed successfully")
     except Exception as e:
         logger.error(f"Error during shutdown: {str(e)}")
         raise
