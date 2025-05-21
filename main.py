@@ -42,25 +42,16 @@ async def health_check(request: Request):
 async def telegram_webhook(request: Request):
     try:
         # Ensure application is initialized
-        if not bot_app.running:
-            logger.info("Initializing bot application...")
-            await bot_app.initialize()
-            await bot_app.start()
-            logger.info("Bot application initialized successfully")
+        # if not bot_app.running:
+        #     logger.info("Initializing bot application...")
+        #     await bot_app.initialize()
+        #     await bot_app.start()
+        #     logger.info("Bot application initialized successfully")
 
         # Parse update
         try:
             data = await request.json()
             update = Update.de_json(data, bot_app.bot)
-        except Exception as e:
-            logger.error(f"Error parsing webhook data: {str(e)}")
-            return JSONResponse(
-                content={"error": "Invalid webhook data", "details": str(e)},
-                status_code=400
-            )
-
-        # Process update
-        try:
             await bot_app.process_update(update)
             return JSONResponse(content={"status": "ok"}, status_code=200)
         except TelegramError as e:
@@ -90,6 +81,8 @@ async def on_startup():
         logger.info("Starting bot application...")
         await bot_app.initialize()
         await bot_app.start()
+
+        await asyncio.sleep(1)
         
         # Set webhook
         logger.info(f"Setting webhook to {WEBHOOK_URL}")
