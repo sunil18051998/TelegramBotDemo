@@ -98,7 +98,7 @@ async def on_startup():
 async def on_shutdown():
     try:
         logger.info("Shutting down bot application...")
-        await bot_app.bot.delete_webhook()
+        #await bot_app.bot.delete_webhook()
         await bot_app.stop()
         await bot_app.shutdown()
         logger.info("Bot shutdown completed successfully")
