@@ -1,22 +1,4 @@
-import os
-from openai import OpenAI
-from typing import Dict, List
-
-class OpenAIHandler:
-    def __init__(self, api_key: str):
-        self.client = OpenAI(api_key=api_key)
-
-    async def generate_response(self, messages: List[Dict]) -> str:
-        """Generate response using OpenAI API"""
-        try:
-            response = self.client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=messages,
-                temperature=0.9,
-            )
-            return response.choices[0].message.content.strip()
-        except Exception as e:
-            raise Exception(f"OpenAI API error: {str(e)}")
+from typing import Dict
 
 def get_system_prompt() -> Dict:
     """Get the system prompt for chat conversations"""

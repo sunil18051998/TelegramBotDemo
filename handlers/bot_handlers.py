@@ -7,7 +7,7 @@ from telegram.ext import ContextTypes
 from config import FREE_MESSAGE_LIMIT, MIN_SECONDS_BETWEEN_MESSAGES
 from payment.paypal import PayPalPayment
 from utils.utils import get_system_prompt
-from main import openai_handler
+from utils.ai_handler import openai_handler
 
 # Initialize logging
 logging.basicConfig(level=logging.INFO)
