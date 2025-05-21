@@ -25,6 +25,13 @@ user_message_count: Dict[int, int] = {}
 chat_histories: Dict[int, List[Dict]] = {}
 paid_users: Set[int] = set()
 
+# Subscription plans
+SUBSCRIPTION_PLANS = {
+    "sub_1m": {"label": "1 Month – ₹49", "months": 1},
+    "sub_3m": {"label": "3 Months – ₹129", "months": 3},
+    "sub_12m": {"label": "12 Months – ₹399", "months": 12},
+}
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /start command"""
     try:
@@ -73,14 +80,16 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_id = update.message.from_user.id
         message = update.message.text
         now = time.time()
+        chat_id = update.effective_chat.id
 
         # Check if user is paid
         if user_id not in paid_users:
             count = user_message_count.get(user_id, 0)
             if count >= FREE_MESSAGE_LIMIT:
-                await update.message.reply_text(
-                    "💕 You've reached your free limit. Subscribe to continue!"
-                )
+                # await update.message.reply_text(
+                #     "💕 You've reached your free limit. Subscribe to continue!"
+                # )
+                show_subscription_options(update, context)
                 return
             user_message_count[user_id] = count + 1
 
@@ -151,3 +160,30 @@ def cleanup_user_data(user_id: int):
         del chat_histories[user_id]
     if user_id in paid_users:
         paid_users.remove(user_id)
+
+def show_subscription_options(update, context):
+    keyboard = [
+        [InlineKeyboardButton(SUBSCRIPTION_PLANS["sub_1m"]["label"], callback_data="sub_1m")],
+        [InlineKeyboardButton(SUBSCRIPTION_PLANS["sub_3m"]["label"], callback_data="sub_3m")],
+        [InlineKeyboardButton(SUBSCRIPTION_PLANS["sub_12m"]["label"], callback_data="sub_12m")]
+    ]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text="🔒 You've reached your 5-message limit.\nPlease choose a subscription to continue:",
+        reply_markup=reply_markup
+    )
+
+def handle_subscription_click(update, context):
+    query = update.callback_query
+    plan_id = query.data
+    plan = SUBSCRIPTION_PLANS.get(plan_id)
+
+    if plan:
+        query.answer()
+        context.bot.send_message(
+            chat_id=query.message.chat.id,
+            text=f"You chose *{plan['label']}*.\n\n(Coming next: Payment integration here!)",
+            parse_mode='Markdown'
+        )

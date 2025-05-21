@@ -11,7 +11,7 @@ class OpenAIHandler:
         if not OPENAI_API_KEY:
             raise ValueError("OpenAI API key is not configured")
         self.client = OpenAI(api_key=OPENAI_API_KEY)
-        self.model = "gpt-3.5-turbo"  # Default model
+        self.model = "gpt-4o-mini"  # Default model
         self.max_retries = 3
         self.timeout = 30  # seconds
 
