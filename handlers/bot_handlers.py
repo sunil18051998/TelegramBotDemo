@@ -6,6 +6,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 from config import FREE_MESSAGE_LIMIT, MIN_SECONDS_BETWEEN_MESSAGES
 from payment.paypal import PayPalPayment
+from utils.utils import get_system_prompt
 
 # Initialize logging
 logging.basicConfig(level=logging.INFO)
@@ -57,7 +58,11 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "💕 You've reached your free limit. Subscribe to continue!"
             )
             return
+        chat_histories.setdefault(user_id, [get_system_prompt()])
         user_message_count[user_id] = count + 1
+
+    # Initialize chat history if needed
+    chat_histories.setdefault(user_id, [get_system_prompt()])
 
     # Check message rate limit
     if now - user_last_message_time.get(user_id, 0) < MIN_SECONDS_BETWEEN_MESSAGES:

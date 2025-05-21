@@ -3,8 +3,8 @@ from openai import OpenAI
 from typing import Dict, List
 
 class OpenAIHandler:
-    def __init__(self):
-        self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    def __init__(self, api_key: str):
+        self.client = OpenAI(api_key=api_key)
 
     async def generate_response(self, messages: List[Dict]) -> str:
         """Generate response using OpenAI API"""
