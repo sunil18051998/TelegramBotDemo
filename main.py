@@ -10,7 +10,7 @@ from telegram.ext import (
     MessageHandler, filters
 )
 
-from config import WEBHOOK_PATH, WEBHOOK_URL, WEBHOOK_SECRET, BOT_TOKEN, OPENAI_API_KEY, RENDER_EXTERNAL_URL
+from config import WEBHOOK_PATH, WEBHOOK_URL, WEBHOOK_SECRET, BOT_TOKEN, OPENAI_API_KEY
 from handlers.bot_handlers import start, subscribe, echo, error_handler
 from utils.utils import OpenAIHandler
 
@@ -18,10 +18,10 @@ from utils.utils import OpenAIHandler
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Environment variables
-TOKEN = os.getenv("BOT_TOKEN")
+# Initialize bot and OpenAI handler
+bot_app = ApplicationBuilder().token(BOT_TOKEN).build()
+openai_handler = OpenAIHandler(api_key=OPENAI_API_KEY)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-RENDER_EXTERNAL_URL = os.getenv("RENDER_EXTERNAL_URL")
 
 # Initialize OpenAI handler
 openai_handler = OpenAIHandler(api_key=OPENAI_API_KEY)

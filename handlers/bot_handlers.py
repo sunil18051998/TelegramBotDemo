@@ -6,7 +6,8 @@ from telegram import Update
 from telegram.ext import ContextTypes
 from config import FREE_MESSAGE_LIMIT, MIN_SECONDS_BETWEEN_MESSAGES
 from payment.paypal import PayPalPayment
-from utils.utils import get_system_prompt, OpenAIHandler
+from utils.utils import get_system_prompt
+from main import openai_handler
 
 # Initialize logging
 logging.basicConfig(level=logging.INFO)
@@ -73,8 +74,8 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Process message with OpenAI
     try:
-        # Initialize OpenAI handler
-        openai_handler = OpenAIHandler(api_key=os.getenv("OPENAI_API_KEY"))
+        # Use the global OpenAI handler initialized in main.py
+        global_openai_handler = openai_handler
         
         # Get chat history
         chat_history = chat_histories.get(user_id, [])
