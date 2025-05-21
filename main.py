@@ -20,10 +20,6 @@ logger = logging.getLogger(__name__)
 
 # Initialize bot
 bot_app = ApplicationBuilder().token(BOT_TOKEN).build()
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-
-# Initialize OpenAI handler
-openai_handler = OpenAIHandler(api_key=OPENAI_API_KEY)
 
 # FastAPI app and Telegram bot
 app = FastAPI()
