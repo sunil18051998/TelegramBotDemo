@@ -10,7 +10,7 @@ from telegram.ext import (
     MessageHandler, filters
 )
 
-from config import WEBHOOK_PATH, WEBHOOK_URL, WEBHOOK_SECRET, TOKEN, OPENAI_API_KEY, RENDER_EXTERNAL_URL
+from config import WEBHOOK_PATH, WEBHOOK_URL, WEBHOOK_SECRET, BOT_TOKEN, OPENAI_API_KEY, RENDER_EXTERNAL_URL
 from handlers.bot_handlers import start, subscribe, echo, error_handler
 from utils.utils import OpenAIHandler
 
