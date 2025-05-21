@@ -54,14 +54,14 @@ bot_app.add_error_handler(error_handler)
 # Webhook handler
 @app.post(WEBHOOK_PATH)
 async def telegram_webhook(request: Request):
-    if request.path_params.get("secret") != WEBHOOK_SECRET:
-        return JSONResponse(status_code=403)
-    
-    data = await request.json()
-    await bot_app.process_update(
-        Update.de_json(data, bot_app.bot)
-    )
-    return JSONResponse(status_code=200)
+    try:
+        data = await request.json()
+        update = Update.de_json(data, bot_app.bot)
+        await bot_app.process_update(update)
+        return JSONResponse(status_code=200)
+    except Exception as e:
+        logger.error(f"Webhook error: {str(e)}")
+        return JSONResponse(status_code=500)
 
 # Lifecycle hooks
 async def on_startup():

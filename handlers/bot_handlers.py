@@ -6,7 +6,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 from config import FREE_MESSAGE_LIMIT, MIN_SECONDS_BETWEEN_MESSAGES
 from payment.paypal import PayPalPayment
-from utils.utils import get_system_prompt
+from utils.utils import get_system_prompt, OpenAIHandler
 
 # Initialize logging
 logging.basicConfig(level=logging.INFO)
@@ -71,8 +71,31 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user_last_message_time[user_id] = now
 
-    # Process message with OpenAI (to be implemented)
-    await update.message.reply_text("Processing your message...")
+    # Process message with OpenAI
+    try:
+        # Initialize OpenAI handler
+        openai_handler = OpenAIHandler(api_key=os.getenv("OPENAI_API_KEY"))
+        
+        # Get chat history
+        chat_history = chat_histories.get(user_id, [])
+        
+        # Add user message to history
+        chat_history.append({"role": "user", "content": message})
+        
+        # Get response from OpenAI
+        response = await openai_handler.generate_response(chat_history)
+        
+        # Add AI response to history
+        chat_history.append({"role": "assistant", "content": response})
+        
+        # Update chat history
+        chat_histories[user_id] = chat_history[-50:]  # Keep last 50 messages
+        
+        # Send response
+        await update.message.reply_text(response)
+    except Exception as e:
+        logger.error(f"Error processing message: {str(e)}")
+        await update.message.reply_text("Oops! I'm having a moment. Try again later 💔")
 
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
     """Handle errors"""
