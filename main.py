@@ -52,6 +52,7 @@ async def telegram_webhook(request: Request):
         try:
             data = await request.json()
             update = Update.de_json(data, bot_app.bot)
+            logger.info("some updates...")
             await bot_app.process_update(update)
             return JSONResponse(content={"status": "ok"}, status_code=200)
         except TelegramError as e:
@@ -89,7 +90,7 @@ async def on_startup():
         result = await bot_app.bot.set_webhook(WEBHOOK_URL)
         logger.info(f"Webhook set result: {result}")
 
-        logger.info("Bot started and webhook set successfully")
+        logger.info("Bot started and webhook set ")
     except Exception as e:
         logger.error(f"Error during startup: {str(e)}")
         raise
