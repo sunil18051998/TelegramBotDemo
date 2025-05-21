@@ -108,6 +108,7 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
             chat_history.append({"role": "user", "content": message})
             
             # Get response from OpenAI
+            await update.message.chat.send_action("typing")
             response = await openai_handler.generate_response(chat_history)
             
             # Add AI response to history
