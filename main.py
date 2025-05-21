@@ -4,17 +4,13 @@ import platform
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from telegram import Update
-from telegram.ext import (
-    ApplicationBuilder, CommandHandler, ContextTypes,
-    MessageHandler, filters
-)
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
 
 from config import (
     WEBHOOK_PATH, WEBHOOK_URL, WEBHOOK_SECRET, BOT_TOKEN,
     FREE_MESSAGE_LIMIT, MIN_SECONDS_BETWEEN_MESSAGES
 )
 from handlers.bot_handlers import start, subscribe, echo, error_handler
-from utils.ai_handler import openai_handler
 
 # Setup logging
 logging.basicConfig(
@@ -40,37 +36,50 @@ bot_app.add_error_handler(error_handler)
 async def health_check(request: Request):
     return JSONResponse(content={"status": "ok"}, status_code=200)
 
-# Message limits and user tracking
-user_last_message_time = {}
-user_message_count = {}
-chat_histories = {}
-paid_users = set()
-
-PAYMENT_LINK = "https://yourwebsite.com/subscribe"
-
 # Webhook handler
 @app.post(WEBHOOK_PATH)
 async def telegram_webhook(request: Request):
     try:
+        # Initialize the application if not already initialized
+        if not bot_app.running:
+            await bot_app.initialize()
+            await bot_app.start()
+            await bot_app.updater.start_polling()
+
         data = await request.json()
         update = Update.de_json(data, bot_app.bot)
         await bot_app.process_update(update)
-        return JSONResponse(status_code=200)
+        return JSONResponse(content={"status": "ok"}, status_code=200)
     except Exception as e:
         logger.error(f"Webhook error: {str(e)}")
-        return JSONResponse(status_code=500)
+        return JSONResponse(
+            content={"error": "Internal server error", "details": str(e)},
+            status_code=500
+        )
 
 # Lifecycle hooks
+@app.on_event("startup")
 async def on_startup():
-    await bot_app.bot.set_webhook(WEBHOOK_URL)
-    logger.info("Bot started and webhook set")
+    try:
+        await bot_app.initialize()
+        await bot_app.start()
+        await bot_app.updater.start_polling()
+        await bot_app.bot.set_webhook(WEBHOOK_URL)
+        logger.info("Bot started and webhook set")
+    except Exception as e:
+        logger.error(f"Error during startup: {str(e)}")
+        raise
 
+@app.on_event("shutdown")
 async def on_shutdown():
-    await bot_app.bot.delete_webhook()
-    logger.info("Bot shutdown and webhook removed")
-
-app.add_event_handler("startup", on_startup)
-app.add_event_handler("shutdown", on_shutdown)
+    try:
+        await bot_app.bot.delete_webhook()
+        await bot_app.stop()
+        await bot_app.shutdown()
+        logger.info("Bot shutdown and webhook removed")
+    except Exception as e:
+        logger.error(f"Error during shutdown: {str(e)}")
+        raise
 
 # Local dev entry point
 if __name__ == "__main__":
