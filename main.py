@@ -93,7 +93,9 @@ async def on_startup():
         
         # Set webhook
         logger.info(f"Setting webhook to {WEBHOOK_URL}")
-        await bot_app.bot.set_webhook(WEBHOOK_URL)
+        result = await bot_app.bot.set_webhook(WEBHOOK_URL)
+        logger.info(f"Webhook set result: {result}")
+
         logger.info("Bot started and webhook set successfully")
     except Exception as e:
         logger.error(f"Error during startup: {str(e)}")
