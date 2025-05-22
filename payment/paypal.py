@@ -1,66 +1,54 @@
+import requests
 import os
-from paypalrestsdk import Api, Order
+from typing import Optional
 from dotenv import load_dotenv
-from typing import Dict, List
 
 load_dotenv()
 
-# Initialize PayPal API
-api = Api({
-    'mode': os.getenv('PAYPAL_ENVIRONMENT', 'sandbox'),
-    'client_id': os.getenv('PAYPAL_CLIENT_ID'),
-    'client_secret': os.getenv('PAYPAL_CLIENT_SECRET')
-})
-
 class PayPalPayment:
     def __init__(self):
-        self.api = api
+        self.client_id = os.getenv("PAYPAL_CLIENT_ID")
+        self.client_secret = os.getenv("PAYPAL_CLIENT_SECRET")
+        self.env = os.getenv("PAYPAL_ENVIRONMENT")
+        self.base_url = "https://api-m.sandbox.paypal.com" if self.env == "sandbox" else "https://api-m.paypal.com"
+        self.access_token = self.get_access_token()
 
-    def create_order(self, plan_id: str, user_id: str) -> Dict:
-        """Create a PayPal order for a subscription plan"""
-        from config import SUBSCRIPTION_PLANS
-        
-        plan = SUBSCRIPTION_PLANS[plan_id]
-        
-        order = Order({
+    def get_access_token(self) -> str:
+        response = requests.post(
+            f"{self.base_url}/v1/oauth2/token",
+            auth=(self.client_id, self.client_secret),
+            data={"grant_type": "client_credentials"},
+            headers={"Accept": "application/json"}
+        )
+        response.raise_for_status()
+        return response.json()["access_token"]
+
+    def create_payment_link(self, amount: float, currency: str, return_url: str, cancel_url: str, telegram_user_id: int) -> Optional[str]:
+        headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/json"
+        }
+
+        payload = {
             "intent": "CAPTURE",
             "purchase_units": [{
                 "amount": {
-                    "currency_code": plan["currency"],
-                    "value": str(plan["price"])
+                    "currency_code": currency,
+                    "value": str(amount)
                 },
-                "description": f"{plan_id.title()} subscription"
+                "custom_id": str(telegram_user_id)
             }],
             "application_context": {
-                "brand_name": "LoveBot",
-                "user_action": "PAY_NOW",
-                "return_url": f"https://yourwebsite.com/success?user_id={user_id}",
-                "cancel_url": f"https://yourwebsite.com/cancel?user_id={user_id}"
+                "return_url": return_url,
+                "cancel_url": cancel_url
             }
-        })
+        }
 
-        if order.create():
-            return {
-                "status": "success",
-                "order_id": order.id,
-                "approve_link": order.links[1].href
-            }
-        else:
-            raise Exception(f"Order creation failed: {order.error}")
+        response = requests.post(f"{self.base_url}/v2/checkout/orders", json=payload, headers=headers)
+        response.raise_for_status()
+        links = response.json()["links"]
+        for link in links:
+            if link["rel"] == "approve":
+                return link["href"]  # This is the PayPal payment link
 
-    def capture_order(self, order_id: str) -> Dict:
-        """Capture payment for an order"""
-        order = Order.find(order_id)
-        
-        if order.capture():
-            return {
-                "status": "success",
-                "capture_id": order.purchase_units[0].payments.captures[0].id
-            }
-        else:
-            raise Exception(f"Order capture failed: {order.error}")
-
-    def get_subscription_plans(self) -> List[Dict]:
-        """Get available subscription plans"""
-        from config import SUBSCRIPTION_PLANS
-        return list(SUBSCRIPTION_PLANS.values())
+        return None

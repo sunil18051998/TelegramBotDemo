@@ -75,6 +75,29 @@ async def telegram_webhook(request: Request):
             status_code=500
         )
 
+@app.post("/webhook/paypal")
+async def paypal_webhook(request: Request):
+    try:
+        data = await request.json()
+        event_type = data.get("event_type")
+        logger.info(f"Received PayPal webhook: {event_type}")
+
+        if event_type == "CHECKOUT.ORDER.APPROVED" or event_type == "PAYMENT.CAPTURE.COMPLETED":
+            resource = data.get("resource", {})
+            custom_id = resource.get("custom_id") or resource.get("purchase_units", [{}])[0].get("custom_id")
+
+            if custom_id:
+                telegram_user_id = int(custom_id)
+                paid_users.add(telegram_user_id)
+                logger.info(f"User {telegram_user_id} marked as paid via PayPal")
+
+        return JSONResponse({"status": "ok"})
+
+    except Exception as e:
+        logger.error(f"Error in PayPal webhook: {str(e)}")
+        return JSONResponse({"status": "error", "detail": str(e)}, status_code=500)
+
+
 # Lifecycle hooks
 @app.on_event("startup")
 async def on_startup():

@@ -47,23 +47,17 @@ async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         user_id = update.message.from_user.id
         
-        # Get available plans
-        plans = payment_handler.get_subscription_plans()
-        if not plans:
-            await update.message.reply_text(
-                "Sorry, subscription plans are currently unavailable. Please try again later."
-            )
-            return
-            
-        plan_text = "\n".join([
-            f"{i+1}. {plan['currency']} {plan['price']} - Monthly"
-            for i, plan in enumerate(plans)
-        ])
-        
-        await update.message.reply_text(
-            f"Choose your subscription plan:\n\n{plan_text}\n\n"
-            "Reply with the number of your choice to subscribe!"
+        paypal_link = payment_handler.create_payment_link(
+            amount=4.00,
+            currency="USD",
+            return_url="https://telegrambotdemo.onrender.com/thankyou",
+            cancel_url="https://telegrambotdemo.onrender.com/cancel",
+            telegram_user_id=update.message.from_user.id
         )
+
+        if paypal_link:
+            await update.message.reply_text(f"Click to pay: {paypal_link}")
+
     except Exception as e:
         logger.error(f"Error in subscribe command: {str(e)}")
         await update.message.reply_text("Sorry, there was an error processing your request. Please try again later.")
