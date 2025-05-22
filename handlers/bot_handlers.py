@@ -94,12 +94,22 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
                 keyboard = [
                     [
-                        InlineKeyboardButton("💞 Crush (Razorpay)", url="https://rzp.io/l/crush-payment-link"),
-                        InlineKeyboardButton("💘 Fantasy (Razorpay)", url="https://rzp.io/l/fling-payment-link"),
-                        InlineKeyboardButton("🍓 Girlfriend (Razorpay)", url="https://rzp.io/l/fantasy-payment-link"),
-                        InlineKeyboardButton("💞 Crush (Paypal)", url="https://paypal.com/l/crush-payment-link"),
-                        InlineKeyboardButton("💘 Fantasy (Paypal)", url="https://paypal.com/l/fling-payment-link"),
-                        InlineKeyboardButton("🍓 Girlfriend (Paypal)", url="https://paypal.com/l/fantasy-payment-link"),
+                        InlineKeyboardButton("💞 Crush (Razorpay)", url="https://rzp.io/l/crush-payment-link")
+                    ],
+                    [
+                        InlineKeyboardButton("💘 Fantasy (Razorpay)", url="https://rzp.io/l/fling-payment-link")
+                    ],
+                    [
+                        InlineKeyboardButton("🍓 Girlfriend (Razorpay)", url="https://rzp.io/l/fantasy-payment-link")
+                    ],
+                    [
+                        InlineKeyboardButton("💞 Crush (Paypal)", url="https://paypal.com/l/crush-payment-link")
+                    ],
+                    [
+                        InlineKeyboardButton("💘 Fantasy (Paypal)", url="https://paypal.com/l/fling-payment-link")
+                    ],
+                    [
+                        InlineKeyboardButton("🍓 Girlfriend (Paypal)", url="https://paypal.com/l/fantasy-payment-link")
                     ]
                 ]
                 reply_markup = InlineKeyboardMarkup(keyboard)
