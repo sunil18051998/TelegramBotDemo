@@ -8,6 +8,7 @@ from config import FREE_MESSAGE_LIMIT, MIN_SECONDS_BETWEEN_MESSAGES
 from payment.paypal import PayPalPayment
 from utils.utils import get_system_prompt
 from utils.ai_handler import openai_handler
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 # Initialize logging
 logging.basicConfig(
@@ -78,8 +79,43 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if user_id not in paid_users:
             count = user_message_count.get(user_id, 0)
             if count >= FREE_MESSAGE_LIMIT:
+                subscription_text = (
+                    "*UNRESTRICTED ACCESS  |  UNLIMITED FUN*\n\n"
+                    "_Limited time offer ends soon! ⏳_\n"
+                    "Get access to All Fling Supermodels. Checkout: @flingfun\n"
+                    "────────────────────────────\n"
+                    "💞 *Crush* ₹49\n"
+                    "• 100 Messages\n"
+                    "• 10 Images\n"
+                    "• Access all girls\n"
+                    "🔓 [Unlock Crush](https://rzp.io/l/crush-payment-link)\n\n"
+                    "💘 *Fling* ₹199 _(Most Popular)_\n"
+                    "• 1000 Messages\n"
+                    "• 100 Images\n"
+                    "• 10 Videos\n"
+                    "• Access all girls\n"
+                    "🔓 [Unlock Fling](https://rzp.io/l/fling-payment-link)\n\n"
+                    "🍓 *Fantasy* ₹499 _(Best Value)_\n"
+                    "• 5000 Messages\n"
+                    "• 500 Images\n"
+                    "• 50 Videos\n"
+                    "• Access all girls\n"
+                    "🔓 [Unlock Fantasy](https://rzp.io/l/fantasy-payment-link)\n\n"
+                    "🔐 *Secure payment via Razorpay*"
+                )
+
+                keyboard = [
+                    [
+                        InlineKeyboardButton("💞 Go Crush", url="https://rzp.io/l/crush-payment-link"),
+                        InlineKeyboardButton("💘 Get Fling", url="https://rzp.io/l/fling-payment-link"),
+                        InlineKeyboardButton("🍓 iFantasy", url="https://rzp.io/l/fantasy-payment-link"),
+                    ]
+                ]
+                reply_markup = InlineKeyboardMarkup(keyboard)
                 await update.message.reply_text(
-                    "💕 You've reached your free limit. Subscribe to continue!"
+                    subscription_text,
+                    reply_markup=reply_markup,
+                    parse_mode="Markdown"
                 )
                 return
             user_message_count[user_id] = count + 1
@@ -103,32 +139,33 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
             # Get chat history
             chat_history = chat_histories[user_id]
-            
+
             # Add user message to history
             chat_history.append({"role": "user", "content": message})
-            
+
             # Get response from OpenAI
             await update.message.chat.send_action("typing")
             response = await openai_handler.generate_response(chat_history)
-            
+
             # Add AI response to history
             chat_history.append({"role": "assistant", "content": response})
-            
+
             # Update chat history (keep last 50 messages)
             chat_histories[user_id] = chat_history[-50:]
-            
+
             # Send response
             await update.message.reply_text(response)
-            
+
         except Exception as e:
             logger.error(f"Error processing OpenAI response: {str(e)}")
             await update.message.reply_text(
                 "I'm having trouble processing your message right now. Please try again in a few moments."
             )
-            
+
     except Exception as e:
         logger.error(f"Error in echo handler: {str(e)}")
         await update.message.reply_text("Oops! Something went wrong. Please try again later.")
+
 
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
     """Handle errors"""
