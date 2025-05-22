@@ -84,11 +84,11 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     "_Limited time offer ends soon! ⏳_\n"
                     "────────────────────────────\n"
                     "💞 *Crush* ₹299 or $4\n"
-                    "• 100 Messages\n"
-                    "💘 *Fantasy* ₹1999 or $25 _*(Most Popular)*_\n"
-                    "• 1000 Messages\n"
-                    "🍓 *Girlfriend* ₹3999 or $50 _*(Best Value)*_\n"
-                    "• 3000 Messages\n"
+                    "• 100 Messages\n\n\n"
+                    "💘 *Fantasy* ₹1999 or $25 *(Most Popular)*\n"
+                    "• 1000 Messages\n\n\n"
+                    "🍓 *Girlfriend* ₹3999 or $50 *(Best Value)*\n"
+                    "• 3000 Messages\n\n\n"
                     " *Secure payment via Razorpay and PayPal*"
                 )
 
