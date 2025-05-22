@@ -82,33 +82,24 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 subscription_text = (
                     "*UNRESTRICTED ACCESS  |  UNLIMITED FUN*\n\n"
                     "_Limited time offer ends soon! ⏳_\n"
-                    "Get access to All Fling Supermodels. Checkout: @flingfun\n"
                     "────────────────────────────\n"
-                    "💞 *Crush* ₹49\n"
+                    "💞 *Crush* ₹299 or $4\n"
                     "• 100 Messages\n"
-                    "• 10 Images\n"
-                    "• Access all girls\n"
-                    "🔓 [Unlock Crush](https://rzp.io/l/crush-payment-link)\n\n"
-                    "💘 *Fling* ₹199 _(Most Popular)_\n"
+                    "💘 *Fantasy* ₹1999 or $25 _*(Most Popular)*_\n"
                     "• 1000 Messages\n"
-                    "• 100 Images\n"
-                    "• 10 Videos\n"
-                    "• Access all girls\n"
-                    "🔓 [Unlock Fling](https://rzp.io/l/fling-payment-link)\n\n"
-                    "🍓 *Fantasy* ₹499 _(Best Value)_\n"
-                    "• 5000 Messages\n"
-                    "• 500 Images\n"
-                    "• 50 Videos\n"
-                    "• Access all girls\n"
-                    "🔓 [Unlock Fantasy](https://rzp.io/l/fantasy-payment-link)\n\n"
-                    "🔐 *Secure payment via Razorpay*"
+                    "🍓 *Girlfriend* ₹3999 or $50 _*(Best Value)*_\n"
+                    "• 3000 Messages\n"
+                    " *Secure payment via Razorpay and PayPal*"
                 )
 
                 keyboard = [
                     [
-                        InlineKeyboardButton("💞 Go Crush", url="https://rzp.io/l/crush-payment-link"),
-                        InlineKeyboardButton("💘 Get Fling", url="https://rzp.io/l/fling-payment-link"),
-                        InlineKeyboardButton("🍓 iFantasy", url="https://rzp.io/l/fantasy-payment-link"),
+                        InlineKeyboardButton("💞 Crush (Razorpay)", url="https://rzp.io/l/crush-payment-link"),
+                        InlineKeyboardButton("💘 Fantasy (Razorpay)", url="https://rzp.io/l/fling-payment-link"),
+                        InlineKeyboardButton("🍓 Girlfriend (Razorpay)", url="https://rzp.io/l/fantasy-payment-link"),
+                        InlineKeyboardButton("💞 Crush (Paypal)", url="https://paypal.com/l/crush-payment-link"),
+                        InlineKeyboardButton("💘 Fantasy (Paypal)", url="https://paypal.com/l/fling-payment-link"),
+                        InlineKeyboardButton("🍓 Girlfriend (Paypal)", url="https://paypal.com/l/fantasy-payment-link"),
                     ]
                 ]
                 reply_markup = InlineKeyboardMarkup(keyboard)
